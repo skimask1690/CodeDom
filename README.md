@@ -29,7 +29,7 @@ This is a Windows Forms-based **code editor** that allows you to write, edit, an
    - The compiled code is executed on a separate thread, with output displayed in the console.
 
 4. **Stopping Execution**  
-   - If the running code is long-running or needs to be halted, click the **Stop** button to abort execution.
+   - If the running code needs to be halted, click the **Stop** button to abort execution.
 
 5. **Managing Assembly References**  
    - Use the interface to select which system assemblies to reference during compilation
