@@ -1,6 +1,6 @@
 # 📝 CodeDom Dynamic Code Editor
 
-This is a Windows Forms-based **code editor** that allows you to write, edit, and dynamically compile and execute C#, VB.NET, and JScript.NET code using the [CodeDom Compiler](https://learn.microsoft.com/en-us/dotnet/api/system.codedom.compiler?view=net-9.0). It is designed for experimentation and rapid prototyping.
+This is a Windows Forms-based **code editor** that allows you to write, edit, and dynamically compile and execute C#, VB.NET, and JScript.NET code using the [CodeDom Compiler](https://learn.microsoft.com/en-us/dotnet/api/system.codedom.compiler). It is designed for experimentation and rapid prototyping.
 
 ---
 
