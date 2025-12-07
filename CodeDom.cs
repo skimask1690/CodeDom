@@ -214,7 +214,7 @@ class Program {
     splitContainer.Panel1.Controls.Add(leftPanel);
 
     // References panel
-    var referenceLabel = new Label { Text = "Referenced Assemblies:", ForeColor = Color.White, Font = font, Dock = DockStyle.Top, TextAlign = ContentAlignment.MiddleCenter, Height = 33, BackColor = Color.FromArgb(48, 48, 48) };
+    var referenceLabel = new Label { Text = "Referenced Assemblies:", ForeColor = Color.White, Font = font, Dock = DockStyle.Top, TextAlign = ContentAlignment.MiddleCenter, Height = 34, BackColor = Color.FromArgb(48, 48, 48) };
     var referenceList = new CheckedListBox { Dock = DockStyle.Fill, BackColor = Color.FromArgb(48, 48, 48), ForeColor = Color.White, Font = font, BorderStyle = BorderStyle.FixedSingle, ItemHeight = 20, Padding = new Padding(5), IntegralHeight = false };
 
     var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -346,3 +346,4 @@ class Program {
         }
     }
 }
+
