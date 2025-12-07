@@ -27,7 +27,6 @@ class Program
     {
         const int width = 80, height = 20;
         double t = 0;
-
         while (true)
         {
             Console.Clear();
@@ -378,3 +377,4 @@ class Program {
         }
     }
 }
+
