@@ -53,6 +53,7 @@ static void ShowEditor(string initialCode)
     string csharpTemplate = initialCode;
     string vbTemplate = @"Imports System
 Imports System.Threading
+
 Module Program
     Sub Main()
         Const width As Integer = 80
@@ -81,6 +82,7 @@ End Module";
 
     string jscriptTemplate = @"import System
 import System.Threading
+
 class Program {
     static function Main() {
         const width = 80
@@ -377,4 +379,5 @@ class Program {
         }
     }
 }
+
 
