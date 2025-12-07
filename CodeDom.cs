@@ -179,7 +179,7 @@ class Program {
     var namePanel = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, WrapContents = false, Height = 40, Dock = DockStyle.Top, AutoSize = false, Padding = new Padding(5) };
     namePanel.Controls.AddRange(new Control[] { classLabel, classTextBox, methodLabel, methodTextBox, languageLabel, languageComboBox });
 
-    var chooseFileButton = new Button { Text = "Choose File", Width = 100, Height = 25, Font = font, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Margin = new Padding(30, 3, 5, 5) };
+    var chooseFileButton = new Button { Text = "Open", Width = 70, Height = 27, Font = font, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Margin = new Padding(30, 3, 5, 5) };
     chooseFileButton.Click += (s, e) =>
     {
         using (var openFileDialog = new OpenFileDialog())
@@ -192,6 +192,38 @@ class Program {
         }
     };
     namePanel.Controls.Add(chooseFileButton);
+	
+    var saveFileButton = new Button 
+    { 
+        Text = "Save", 
+        Width = 70, 
+        Height = 27, 
+        Font = font, 
+        ForeColor = Color.White, 
+        BackColor = Color.FromArgb(48, 48, 48), 
+        Margin = new Padding(15, 3, 5, 5) 
+    };
+    saveFileButton.Click += (s, e) =>
+    {
+        using (var saveFileDialog = new SaveFileDialog())
+        {
+            saveFileDialog.Filter = "C# Files (*.cs)|*.cs|VB.NET Files (*.vb)|*.vb|JScript.NET Files (*.js)|*.js|All Files (*.*)|*.*";
+            saveFileDialog.DefaultExt = languageComboBox.SelectedItem.ToString() == "C#" ? "cs" :
+                                       languageComboBox.SelectedItem.ToString() == "VB.NET" ? "vb" : "js";
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    File.WriteAllText(saveFileDialog.FileName, editor.Text);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error saving file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+    };
+    namePanel.Controls.Add(saveFileButton);
 
     var editorPanel = new Panel { Dock = DockStyle.Fill };
     editorPanel.Controls.Add(editor);
@@ -346,5 +378,3 @@ class Program {
         }
     }
 }
-
-
