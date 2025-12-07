@@ -49,37 +49,27 @@ class Program
         ShowEditor(code);
     }
 
-    static void ShowEditor(string initialCode)
-    {
-        // Define code templates for each language.
-        // Use the initial code as the C# template.
-        string csharpTemplate = initialCode;
-        string vbTemplate = @"Imports System
+static void ShowEditor(string initialCode)
+{
+    string csharpTemplate = initialCode;
+    string vbTemplate = @"Imports System
 Imports System.Threading
-
 Module Program
     Sub Main()
         Const width As Integer = 80
         Const height As Integer = 20
         Dim t As Double = 0
-
         While True
             Console.Clear()
             For y As Integer = 0 To height - 1
                 For x As Integer = 0 To width - 1
                     Dim wave As Double = Math.Sin(x * 0.15 + t) + Math.Sin(y * 0.3 + t)
                     Dim c As Char
-                    If wave > 1 Then
-                        c = ""@""c
-                    ElseIf wave > 0.5 Then
-                        c = ""#""c
-                    ElseIf wave > 0 Then
-                        c = ""*""c
-                    ElseIf wave > -0.5 Then
-                        c = "".""c
-                    Else
-                        c = "" ""c
-                    End If
+                    If wave > 1 Then c = ""@""c
+                    ElseIf wave > 0.5 Then c = ""#""c
+                    ElseIf wave > 0 Then c = ""*""c
+                    ElseIf wave > -0.5 Then c = "".""c
+                    Else c = "" ""c
                     Console.Write(c)
                 Next
                 Console.WriteLine()
@@ -89,33 +79,25 @@ Module Program
         End While
     End Sub
 End Module";
-        string jscriptTemplate = @"import System
-import System.Threading
 
+    string jscriptTemplate = @"import System
+import System.Threading
 class Program {
     static function Main() {
         const width = 80
         const height = 20
         var t = 0
-
         while (true) {
             Console.Clear()
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     var wave = Math.sin(x * 0.15 + t) + Math.sin(y * 0.3 + t)
                     var c
-
-                    if (wave > 1) {
-                        c = '@'
-                    } else if (wave > 0.5) {
-                        c = '#'
-                    } else if (wave > 0) {
-                        c = '*'
-                    } else if (wave > -0.5) {
-                        c = '.'
-                    } else {
-                        c = ' '
-                    }
+                    if (wave > 1) c = '@'
+                    else if (wave > 0.5) c = '#'
+                    else if (wave > 0) c = '*'
+                    else if (wave > -0.5) c = '.'
+                    else c = ' '
                     Console.Write(c)
                 }
                 Console.WriteLine()
@@ -125,292 +107,152 @@ class Program {
         }
     }
 }";
-        var form = new Form
+
+    var form = new Form
+    {
+        Text = "CodeDom Editor",
+        Size = new Size(1280, 1024),
+        BackColor = Color.FromArgb(38, 38, 38)
+    };
+
+    var font = new Font("Segoe UI", 10);
+
+    // Header controls
+    var classLabel = new Label { Text = "Class:", Width = 60, Height = 35, ForeColor = Color.White, Font = font, TextAlign = ContentAlignment.MiddleRight };
+    var classTextBox = new TextBox { Text = "Program", Width = 100, Height = 25, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Font = font };
+    var methodLabel = new Label { Text = "Public Method:", Width = 60, Height = 35, ForeColor = Color.White, Font = new Font("Segoe UI", 8), TextAlign = ContentAlignment.MiddleRight };
+    var methodTextBox = new TextBox { Text = "Main", Width = 100, Height = 25, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Font = font };
+    var languageLabel = new Label { Text = "Language:", Width = 70, Height = 35, ForeColor = Color.White, Font = font, TextAlign = ContentAlignment.MiddleRight };
+    var languageComboBox = new ComboBox { Width = 100, Height = 25, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Font = font, DropDownStyle = ComboBoxStyle.DropDownList };
+    languageComboBox.Items.AddRange(new string[] { "C#", "VB.NET", "JScript.NET" });
+    languageComboBox.SelectedIndex = 0;
+
+    // Editor and line numbers
+    var lineNumbers = new RichTextBox
+    {
+        Dock = DockStyle.Left,
+        Width = 50,
+        Font = new Font("Consolas", 11),
+        ReadOnly = true,
+        BackColor = Color.FromArgb(50, 50, 50),
+        ForeColor = Color.White,
+        BorderStyle = BorderStyle.None,
+        ScrollBars = RichTextBoxScrollBars.None
+    };
+
+    var editor = new RichTextBox
+    {
+        Text = initialCode,
+        Dock = DockStyle.Fill,
+        Font = new Font("Consolas", 11),
+        WordWrap = false,
+        BorderStyle = BorderStyle.None,
+        ForeColor = Color.White,
+        BackColor = Color.FromArgb(40, 40, 40)
+    };
+
+    // Update editor text when language changes
+    languageComboBox.SelectedIndexChanged += (s, e) =>
+    {
+        switch (languageComboBox.SelectedItem.ToString())
         {
-            Text = "CodeDom Editor",
-            Size = new Size(1280, 1024),
-            BackColor = Color.FromArgb(38, 38, 38)
-        };
+            case "C#": editor.Text = csharpTemplate; break;
+            case "VB.NET": editor.Text = vbTemplate; break;
+            case "JScript.NET": editor.Text = jscriptTemplate; break;
+        }
+    };
 
-        // Font and color settings used for consistency
-        var font = new Font("Segoe UI", 10);
+    // Update line numbers
+    EventHandler updateLineNumbers = (s, e) =>
+    {
+        int firstLine = editor.GetLineFromCharIndex(editor.GetCharIndexFromPosition(new Point(0, 0)));
+        int lineCount = editor.Lines.Length;
+        var sb = new StringBuilder();
+        for (int i = firstLine; i < lineCount; i++) sb.AppendLine((i + 1).ToString());
+        lineNumbers.Text = sb.ToString();
+    };
+    editor.VScroll += updateLineNumbers;
+    editor.TextChanged += updateLineNumbers;
+    UpdateLineNumbers(editor, lineNumbers);
 
-        // Create labels and textboxes for class name and method name
-        var classLabel = new Label
+    // Name panel
+    var namePanel = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, WrapContents = false, Height = 40, Dock = DockStyle.Top, AutoSize = false, Padding = new Padding(5) };
+    namePanel.Controls.AddRange(new Control[] { classLabel, classTextBox, methodLabel, methodTextBox, languageLabel, languageComboBox });
+
+    var chooseFileButton = new Button { Text = "Choose File", Width = 100, Height = 25, Font = font, ForeColor = Color.White, BackColor = Color.FromArgb(48, 48, 48), Margin = new Padding(30, 3, 5, 5) };
+    chooseFileButton.Click += (s, e) =>
+    {
+        using (var openFileDialog = new OpenFileDialog())
         {
-            Text = "Class:",
-            Width = 60,
-            Height = 35,
-            ForeColor = Color.White,
-            Font = font,
-            TextAlign = ContentAlignment.MiddleRight,
-        };
-
-        var classTextBox = new TextBox
-        {
-            Text = "Program",  // Default class name
-            Width = 100,
-            Height = 25,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(48, 48, 48),
-            Font = font,
-        };
-
-        var methodLabel = new Label
-        {
-            Text = "Public Method:",
-            Width = 60,
-            Height = 35,
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 8),
-            TextAlign = ContentAlignment.MiddleRight,
-
-        };
-
-        var methodTextBox = new TextBox
-        {
-            Text = "Main",  // Default method name
-            Width = 100,
-            Height = 25,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(48, 48, 48),
-            Font = font,
-        };
-
-        // Create a ComboBox for language selection
-        var languageLabel = new Label
-        {
-            Text = "Language:",
-            Width = 70,
-            Height = 35,
-            ForeColor = Color.White,
-            Font = font,
-            TextAlign = ContentAlignment.MiddleRight,
-        };
-
-        var languageComboBox = new ComboBox
-        {
-            Width = 100,
-            Height = 25,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(48, 48, 48),
-            Font = font,
-            DropDownStyle = ComboBoxStyle.DropDownList,
-        };
-
-        languageComboBox.Items.Add("C#");
-        languageComboBox.Items.Add("VB.NET");
-        languageComboBox.Items.Add("JScript.NET");
-        languageComboBox.SelectedIndex = 0;  // Default to C#
-
-        // Create the editor now so it can be referenced by the language change handler.
-        var editor = new RichTextBox
-        {
-            Text = initialCode,
-            Dock = DockStyle.Fill,
-            Font = new Font("Consolas", 11),
-            WordWrap = false,
-            BorderStyle = BorderStyle.None,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(40, 40, 40)
-        };
-
-        // When language selection changes, update the code in the editor.
-        languageComboBox.SelectedIndexChanged += (s, e) =>
-        {
-            if (languageComboBox.SelectedItem.ToString() == "C#")
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                editor.Text = csharpTemplate;
-            }
-            else if (languageComboBox.SelectedItem.ToString() == "VB.NET")
-            {
-                editor.Text = vbTemplate;
-            }
-            else if (languageComboBox.SelectedItem.ToString() == "JScript.NET")
-            {
-                editor.Text = jscriptTemplate;
-            }
-        };
-
-        // Header Panel for class name, method name, and language selection
-        var namePanel = new FlowLayoutPanel
-        {
-            FlowDirection = FlowDirection.LeftToRight,
-            WrapContents = false,
-            Height = 40,
-            Dock = DockStyle.Top,
-            AutoSize = false,
-            Width = 400,
-            Padding = new Padding(5)
-        };
-
-        namePanel.Controls.AddRange(new Control[] { classLabel, classTextBox, methodLabel, methodTextBox, languageLabel, languageComboBox });
-
-        // Add Choose File button next to the language dropdown box
-        var chooseFileButton = new Button
-        {
-            Text = "Choose File",
-            Width = 100,
-            Height = 25,
-            Font = font,
-            ForeColor = Color.White,
-            BackColor = Color.FromArgb(48, 48, 48),
-            Margin = new Padding(30, 3, 5, 5)
-        };
-
-        chooseFileButton.Click += (s, e) =>
-        {
-            using (var openFileDialog = new OpenFileDialog())
-            {
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        string fileContent = File.ReadAllText(openFileDialog.FileName);
-                        editor.Text = fileContent;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error reading file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        };
-
-        namePanel.Controls.Add(chooseFileButton);
-
-        // Editor Panel for code editor and line numbers
-        var editorPanel = new Panel { Dock = DockStyle.Fill };
-
-        var lineNumbers = new RichTextBox
-        {
-            Dock = DockStyle.Left,
-            Width = 50,
-            Font = new Font("Consolas", 11),
-            ReadOnly = true,
-            BackColor = Color.FromArgb(50, 50, 50),
-            ForeColor = Color.White,
-            BorderStyle = BorderStyle.None,
-            ScrollBars = RichTextBoxScrollBars.None
-        };
-
-        EventHandler updateLineNumbersHandler = (s, e) => UpdateLineNumbers(editor, lineNumbers);
-        editor.VScroll += updateLineNumbersHandler;
-        editor.TextChanged += updateLineNumbersHandler;
-        UpdateLineNumbers(editor, lineNumbers);
-
-        editorPanel.Controls.Add(editor);
-        editorPanel.Controls.Add(lineNumbers);
-
-        var mainLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 2
-        };
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, namePanel.Height));
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        mainLayout.Controls.Add(namePanel, 0, 0);
-        mainLayout.Controls.Add(editorPanel, 0, 1);
-
-        var runButton = new Button
-        {
-            Text = "Run",
-            Dock = DockStyle.Bottom,
-            Font = new Font("Segoe UI", 11),
-            Height = 30,
-            BackColor = Color.Green,
-            ForeColor = Color.White
-        };
-        runButton.Click += (s, e) =>
-        {
-            StopRunningThread();
-            CompileAndRun(editor.Text, classTextBox.Text, methodTextBox.Text, languageComboBox.SelectedItem.ToString());
-        };
-
-        var stopButton = new Button
-        {
-            Text = "Stop",
-            Dock = DockStyle.Bottom,
-            Font = new Font("Segoe UI", 11),
-            Height = 30,
-            BackColor = Color.Red,
-            ForeColor = Color.White
-        };
-        stopButton.Click += (s, e) => StopRunningThread();
-
-        var referencePanel = new Panel
-        {
-            Dock = DockStyle.Right,
-            Width = 195
-        };
-
-        var referenceLabel = new Label
-        {
-            Text = "Referenced Assemblies:",
-            ForeColor = Color.White,
-            Font = font,
-            Dock = DockStyle.Top,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Height = 30,
-            BackColor = Color.FromArgb(48, 48, 48)
-        };
-
-        var referenceList = new CheckedListBox
-        {
-            Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(48, 48, 48),
-            ForeColor = Color.White,
-            Font = font,
-            BorderStyle = BorderStyle.FixedSingle,
-            ItemHeight = 20,
-            Padding = new Padding(5),
-            IntegralHeight = false
-        };
-
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var assemblyNames = new List<string>();
-
-        foreach (var assembly in assemblies)
-        {
-            string assemblyName = assembly.GetName().Name + ".dll";
-            if (assemblyName.StartsWith("System"))
-            {
-                assemblyNames.Add(assemblyName);
+                try { editor.Text = File.ReadAllText(openFileDialog.FileName); }
+                catch (Exception ex) { MessageBox.Show("Error reading file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
             }
         }
+    };
+    namePanel.Controls.Add(chooseFileButton);
 
-        assemblyNames.Sort((x, y) =>
-        {
-            int lengthComparison = x.Length.CompareTo(y.Length);
-            return lengthComparison != 0 ? lengthComparison : x.CompareTo(y);
-        });
+    var editorPanel = new Panel { Dock = DockStyle.Fill };
+    editorPanel.Controls.Add(editor);
+    editorPanel.Controls.Add(lineNumbers);
 
-        foreach (string assemblyName in assemblyNames)
-        {
-            referenceList.Items.Add(assemblyName, assemblyName == "System.dll");
-        }
+    var runButton = new Button { Text = "Run", Dock = DockStyle.Bottom, Font = new Font("Segoe UI", 11), Height = 30, BackColor = Color.Green, ForeColor = Color.White };
+    runButton.Click += (s, e) => { StopRunningThread(); CompileAndRun(editor.Text, classTextBox.Text, methodTextBox.Text, languageComboBox.SelectedItem.ToString()); };
 
-        referenceList.ItemCheck += (s, e) =>
-        {
-            var newReferences = new List<string>();
-            for (int i = 0; i < referenceList.Items.Count; i++)
-            {
-                var state = (i == e.Index) ? e.NewValue : referenceList.GetItemCheckState(i);
-                if (state == CheckState.Checked)
-                {
-                    newReferences.Add(referenceList.Items[i].ToString());
-                }
-            }
-            references = newReferences;
-        };
+    var stopButton = new Button { Text = "Stop", Dock = DockStyle.Bottom, Font = new Font("Segoe UI", 11), Height = 30, BackColor = Color.Red, ForeColor = Color.White };
+    stopButton.Click += (s, e) => StopRunningThread();
 
-        referencePanel.Controls.Add(referenceList);
-        referencePanel.Controls.Add(referenceLabel);
+    // SplitContainer for adjustable references
+    var splitContainer = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Vertical };
+    form.Shown += (s, e) => splitContainer.SplitterDistance = form.ClientSize.Width - 195;
+    var leftPanel = new Panel { Dock = DockStyle.Fill };
+    leftPanel.Controls.Add(editorPanel);
+    leftPanel.Controls.Add(namePanel);
+    leftPanel.Controls.Add(runButton);
+    leftPanel.Controls.Add(stopButton);
+    splitContainer.Panel1.Controls.Add(leftPanel);
 
-        form.Controls.AddRange(new Control[] { mainLayout, runButton, stopButton, referencePanel });
-        form.ShowDialog();
+    // References panel
+    var referenceLabel = new Label { Text = "Referenced Assemblies:", ForeColor = Color.White, Font = font, Dock = DockStyle.Top, TextAlign = ContentAlignment.MiddleCenter, Height = 33, BackColor = Color.FromArgb(48, 48, 48) };
+    var referenceList = new CheckedListBox { Dock = DockStyle.Fill, BackColor = Color.FromArgb(48, 48, 48), ForeColor = Color.White, Font = font, BorderStyle = BorderStyle.FixedSingle, ItemHeight = 20, Padding = new Padding(5), IntegralHeight = false };
+
+    var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+    var assemblyNames = new List<string>();
+    foreach (var assembly in assemblies)
+    {
+        string name = assembly.GetName().Name + ".dll";
+        if (name.StartsWith("System")) assemblyNames.Add(name);
     }
+    assemblyNames.Sort((x, y) => { int cmp = x.Length.CompareTo(y.Length); return cmp != 0 ? cmp : x.CompareTo(y); });
+    foreach (var name in assemblyNames) referenceList.Items.Add(name, name == "System.dll");
+
+    referenceList.ItemCheck += (s, e) =>
+    {
+        var newRefs = new List<string>();
+        for (int i = 0; i < referenceList.Items.Count; i++)
+        {
+            var state = (i == e.Index) ? e.NewValue : referenceList.GetItemCheckState(i);
+            if (state == CheckState.Checked) newRefs.Add(referenceList.Items[i].ToString());
+        }
+        references = newRefs;
+    };
+
+    var referencePanel = new Panel { Dock = DockStyle.Fill };
+    referencePanel.Controls.Add(referenceList);
+    referencePanel.Controls.Add(referenceLabel);
+    splitContainer.Panel2.Controls.Add(referencePanel);
+
+    // Sync line numbers width with editor when resizing
+    splitContainer.Panel1.Resize += (s, e) =>
+    {
+        lineNumbers.Height = editor.Height;
+    };
+
+    form.Controls.Add(splitContainer);
+    form.ShowDialog();
+}
+
 
     static void UpdateLineNumbers(RichTextBox editor, RichTextBox lineNumbers)
     {
